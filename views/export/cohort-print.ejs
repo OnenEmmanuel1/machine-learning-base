@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/mlspms.css">
+  <style>
+    body { background-color: #ffffff; padding: 30px; font-size: 12px; }
+    .print-header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; }
+    .print-title { font-size: 18px; font-weight: 800; text-transform: uppercase; color: #0f172a; }
+    .print-sub { font-size: 13px; color: #475569; margin-top: 4px; }
+    .print-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 11px; }
+    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+    .print-table th { background-color: #f1f5f9; font-weight: 700; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="print-header">
+    <div class="print-title">University of Calabar &bull; Department of Computer Science</div>
+    <div class="print-sub">Student Performance Monitoring System (ML-SPMS) — Cohort Performance & Risk Analysis Report</div>
+    <div style="font-size: 11px; color: #64748b; margin-top: 6px;">
+      Date Generated: <%= generatedDate %> &bull; Active Classifier: <%= activeModel ? activeModel.model_type.toUpperCase() + ' (' + activeModel.version + ')' : 'N/A' %>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+    <div style="border: 1px solid #cbd5e1; padding: 10px; text-align: center; border-radius: 4px;">
+      <div style="font-size: 10px; text-transform: uppercase; color: #64748b;">Total Cohort</div>
+      <div style="font-size: 20px; font-weight: 800;"><%= stats.total %></div>
+    </div>
+    <div style="border: 1px solid #86efac; background-color: #f0fdf4; padding: 10px; text-align: center; border-radius: 4px;">
+      <div style="font-size: 10px; text-transform: uppercase; color: #166534;">Low Risk (Safe)</div>
+      <div style="font-size: 20px; font-weight: 800; color: #166534;"><%= stats.lowCount %></div>
+    </div>
+    <div style="border: 1px solid #fcd34d; background-color: #fffbeb; padding: 10px; text-align: center; border-radius: 4px;">
+      <div style="font-size: 10px; text-transform: uppercase; color: #92400e;">Moderate Risk</div>
+      <div style="font-size: 20px; font-weight: 800; color: #92400e;"><%= stats.modCount %></div>
+    </div>
+    <div style="border: 1px solid #fca5a5; background-color: #fef2f2; padding: 10px; text-align: center; border-radius: 4px;">
+      <div style="font-size: 10px; text-transform: uppercase; color: #991b1b;">High Risk</div>
+      <div style="font-size: 20px; font-weight: 800; color: #991b1b;"><%= stats.highCount %></div>
+    </div>
+  </div>
+
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>Matric No.</th>
+        <th>Student Full Name</th>
+        <th>Level</th>
+        <th>Supervisor</th>
+        <th>Avg CA (%)</th>
+        <th>Attendance (%)</th>
+        <th>Submissions (%)</th>
+        <th>ML Risk Standing</th>
+        <th>Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% students.forEach(function(s) { %>
+        <tr>
+          <td><strong><%= s.matric_no %></strong></td>
+          <td><%= s.full_name %></td>
+          <td><%= s.level %>L</td>
+          <td><%= s.supervisor_name || 'N/A' %></td>
+          <td><%= s.avg_ca_score ? s.avg_ca_score + '%' : '0%' %></td>
+          <td><%= s.attendance_rate ? s.attendance_rate + '%' : '0%' %></td>
+          <td><%= s.submission_rate ? s.submission_rate + '%' : '0%' %></td>
+          <td><strong><%= (s.risk_level || 'UNCLASSIFIED').toUpperCase() %></strong></td>
+          <td><%= s.confidence ? s.confidence + '%' : 'N/A' %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px;">
+    <div>
+      ___________________________________<br>
+      <strong>Head of Department</strong><br>
+      Department of Computer Science
+    </div>
+    <div>
+      ___________________________________<br>
+      <strong>Department Examination Officer</strong><br>
+      Faculty of Physical Sciences
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      // Auto trigger print dialog if requested
+      if (window.location.search.includes('autoprint=true')) {
+        window.print();
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Create User Form -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Create New User Account</span>
+          </div>
+          <div class="mlspms-card-body">
+            <form action="/admin/users/create" method="POST">
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" class="mlspms-input" placeholder="e.g. Dr. John Doe" required>
+              </div>
+
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="email">Institutional Email</label>
+                <input type="email" id="email" name="email" class="mlspms-input" placeholder="e.g. j.doe@unical.edu.ng" required>
+              </div>
+
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="password">Password</label>
+                <input type="password" id="password" name="password" class="mlspms-input" placeholder="Minimum 6 characters" required>
+              </div>
+
+              <div class="mlspms-form-row">
+                <div class="mlspms-form-group">
+                  <label class="mlspms-label" for="userRoleSelect">System Role</label>
+                  <select name="role" id="userRoleSelect" class="mlspms-select" required onchange="toggleStudentFields(this.value)">
+                    <option value="lecturer">Lecturer</option>
+                    <option value="administrator">Administrator</option>
+                    <option value="student">Student</option>
+                  </select>
+                </div>
+
+                <div class="mlspms-form-group">
+                  <label class="mlspms-label" for="department">Department</label>
+                  <input type="text" id="department" name="department" class="mlspms-input" value="Computer Science" required>
+                </div>
+              </div>
+
+              <!-- Student Specific Fields (conditional) -->
+              <div id="studentFields" style="display: none; padding-top: 12px; border-top: 1px dashed var(--mlspms-border-color); margin-top: 12px;">
+                <div class="mlspms-form-group">
+                  <label class="mlspms-label" for="matric_no">Matriculation Number</label>
+                  <input type="text" id="matric_no" name="matric_no" class="mlspms-input" placeholder="e.g. CSC/2021/099">
+                </div>
+
+                <div class="mlspms-form-row">
+                  <div class="mlspms-form-group">
+                    <label class="mlspms-label" for="level">Level</label>
+                    <select name="level" id="level" class="mlspms-select">
+                      <option value="100">100 Level</option>
+                      <option value="200">200 Level</option>
+                      <option value="300" selected>300 Level</option>
+                      <option value="400">400 Level</option>
+                    </select>
+                  </div>
+
+                  <div class="mlspms-form-group">
+                    <label class="mlspms-label" for="supervisor_id">Academic Supervisor</label>
+                    <select name="supervisor_id" id="supervisor_id" class="mlspms-select">
+                      <% lecturers.forEach(function(l) { %>
+                        <option value="<%= l.user_id %>"><%= l.full_name %></option>
+                      <% }); %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="mlspms-btn mlspms-btn-primary" style="width: 100%; margin-top: 12px; padding: 10px;">
+                Create Account
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Users Directory Table -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">User Account Directory</span>
+            <input type="text" id="tableSearchInput" class="mlspms-input" placeholder="Filter users..." style="width: 180px; padding: 4px 8px;">
+          </div>
+          <div class="mlspms-table-responsive" style="max-height: 520px; overflow-y: auto;">
+            <table class="mlspms-table mlspms-searchable-table">
+              <thead>
+                <tr>
+                  <th>User Details</th>
+                  <th>Role</th>
+                  <th>Matric / Supervisor</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(function(u) { %>
+                  <tr>
+                    <td>
+                      <strong><%= u.full_name %></strong><br>
+                      <span style="font-size: 11px; color: #64748b;"><%= u.email %></span>
+                    </td>
+                    <td>
+                      <% if (u.role === 'administrator') { %>
+                        <span class="mlspms-badge mlspms-badge-high" style="font-size: 10px;">ADMIN</span>
+                      <% } else if (u.role === 'lecturer') { %>
+                        <span class="mlspms-badge mlspms-badge-primary" style="font-size: 10px;">LECTURER</span>
+                      <% } else { %>
+                        <span class="mlspms-badge mlspms-badge-neutral" style="font-size: 10px;">STUDENT</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (u.matric_no) { %>
+                        <strong><%= u.matric_no %></strong> (<%= u.level %>L)<br>
+                        <span style="font-size: 11px; color: #64748b;">Sup: <%= u.supervisor_name || 'N/A' %></span>
+                      <% } else { %>
+                        <span style="color: #94a3b8; font-size: 11px;">N/A (Staff)</span>
+                      <% } %>
+                    </td>
+                    <td><%= new Date(u.created_at).toISOString().split('T')[0] %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  function toggleStudentFields(role) {
+    const studentFields = document.getElementById('studentFields');
+    if (role === 'student') {
+      studentFields.style.display = 'block';
+    } else {
+      studentFields.style.display = 'none';
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

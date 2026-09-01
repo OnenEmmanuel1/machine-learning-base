@@ -1,0 +1,220 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Single Score Entry Card -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Record Continuous Assessment Score</span>
+            <span class="mlspms-badge mlspms-badge-neutral">Auto-Predict Pipeline Active</span>
+          </div>
+          <div class="mlspms-card-body">
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">
+              Entering or updating a score immediately executes the feature vector computation and invokes the active Machine Learning model to re-evaluate academic risk.
+            </p>
+
+            <form action="/lecturer/scores/entry" method="POST">
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="course_code">Course</label>
+                <select name="course_code" id="course_code" class="mlspms-select" required>
+                  <% courses.forEach(function(c) { %>
+                    <option value="<%= c.course_code %>" <%= selectedCourse === c.course_code ? 'selected' : '' %>>
+                      <%= c.course_code %> — <%= c.title %> (CA Weight: <%= (c.ca_weight * 100).toFixed(0) %>%)
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="student_id">Student</label>
+                <select name="student_id" id="student_id" class="mlspms-select" required>
+                  <option value="">-- Select Student --</option>
+                  <% students.forEach(function(s) { %>
+                    <option value="<%= s.student_id %>">
+                      <%= s.matric_no %> &bull; <%= s.full_name %> (<%= s.level %>L)
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="mlspms-form-row">
+                <div class="mlspms-form-group">
+                  <label class="mlspms-label" for="assessmentTypeSelect">Assessment Type</label>
+                  <select name="assessment_type" id="assessmentTypeSelect" class="mlspms-select" required>
+                    <option value="test">Test (Continuous Assessment)</option>
+                    <option value="assignment">Assignment / Practical Task</option>
+                    <option value="examination">Examination</option>
+                  </select>
+                </div>
+
+                <div class="mlspms-form-group">
+                  <label class="mlspms-label" for="scoreInput">Obtained Score</label>
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    min="0" 
+                    max="30" 
+                    id="scoreInput" 
+                    name="score" 
+                    class="mlspms-input" 
+                    placeholder="Enter mark" 
+                    required
+                  >
+                  <div class="mlspms-helper-text" id="maxScoreHelper">Maximum mark: 30</div>
+                </div>
+              </div>
+
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="date_recorded">Recorded Date</label>
+                <input 
+                  type="date" 
+                  id="date_recorded" 
+                  name="date_recorded" 
+                  class="mlspms-input" 
+                  value="<%= new Date().toISOString().split('T')[0] %>" 
+                  required
+                >
+              </div>
+
+              <button type="submit" class="mlspms-btn mlspms-btn-primary" style="width: 100%; padding: 10px;">
+                Save Score & Trigger ML Evaluation
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Batch Score Entry Form Card -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Batch Course Score Entry</span>
+            <span class="mlspms-badge mlspms-badge-neutral">Fast Grid</span>
+          </div>
+          <div class="mlspms-card-body" style="max-height: 480px; overflow-y: auto;">
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 14px;">
+              Enter assessment marks for multiple students enrolled in <%= selectedCourse || 'the course' %>.
+            </p>
+
+            <form action="/lecturer/scores/batch" method="POST">
+              <div class="mlspms-form-row" style="margin-bottom: 12px;">
+                <div>
+                  <label class="mlspms-label">Course</label>
+                  <select name="course_code" class="mlspms-select" onchange="window.location.href='/lecturer/scores/entry?course=' + this.value;">
+                    <% courses.forEach(function(c) { %>
+                      <option value="<%= c.course_code %>" <%= selectedCourse === c.course_code ? 'selected' : '' %>>
+                        <%= c.course_code %>
+                      </option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div>
+                  <label class="mlspms-label">Type</label>
+                  <select name="assessment_type" class="mlspms-select">
+                    <option value="test">Test</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="examination">Examination</option>
+                  </select>
+                </div>
+              </div>
+
+              <input type="hidden" name="date_recorded" value="<%= new Date().toISOString().split('T')[0] %>">
+
+              <div class="mlspms-table-responsive" style="margin-bottom: 14px;">
+                <table class="mlspms-table" style="font-size: 12px;">
+                  <thead>
+                    <tr>
+                      <th>Matric No.</th>
+                      <th>Student Name</th>
+                      <th style="width: 100px;">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% students.slice(0, 10).forEach(function(s) { %>
+                      <tr>
+                        <td><strong><%= s.matric_no %></strong></td>
+                        <td><%= s.full_name %></td>
+                        <td>
+                          <input 
+                            type="number" 
+                            step="0.1" 
+                            min="0" 
+                            max="100" 
+                            name="scores[<%= s.student_id %>]" 
+                            class="mlspms-input" 
+                            placeholder="Mark" 
+                            style="padding: 4px 6px; font-size: 12px;"
+                          >
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+
+              <button type="submit" class="mlspms-btn mlspms-btn-secondary" style="width: 100%; padding: 8px;">
+                Submit Batch Scores
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Assessment Activity Table -->
+      <div class="mlspms-card">
+        <div class="mlspms-card-header">
+          <span class="mlspms-card-title">Recent Assessment Records Stored</span>
+        </div>
+        <div class="mlspms-table-responsive">
+          <table class="mlspms-table">
+            <thead>
+              <tr>
+                <th>Record ID</th>
+                <th>Matric No.</th>
+                <th>Student Name</th>
+                <th>Course</th>
+                <th>Assessment Type</th>
+                <th>Score</th>
+                <th>Date Recorded</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentAssessments && recentAssessments.length > 0) { %>
+                <% recentAssessments.forEach(function(r) { %>
+                  <tr>
+                    <td>#<%= r.record_id %></td>
+                    <td><strong><%= r.matric_no %></strong></td>
+                    <td><%= r.full_name %></td>
+                    <td><%= r.course_code %></td>
+                    <td>
+                      <span class="mlspms-badge mlspms-badge-neutral">
+                        <%= r.assessment_type.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><strong><%= r.score %></strong></td>
+                    <td><%= new Date(r.date_recorded).toISOString().split('T')[0] %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 20px; color: #64748b;">
+                    No assessment records recorded yet.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

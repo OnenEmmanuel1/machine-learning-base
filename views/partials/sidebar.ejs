@@ -1,0 +1,70 @@
+<aside class="mlspms-sidebar">
+  <div class="mlspms-sidebar-header">
+    <div class="mlspms-logo-icon">&#9670;</div>
+    <div>
+      <div class="mlspms-brand-title">ML-SPMS</div>
+      <div style="font-size: 10px; color: var(--mlspms-text-dim);">UNICAL Computer Science</div>
+    </div>
+  </div>
+
+  <div class="mlspms-nav-group">
+    <% if (currentUser && (currentUser.role === 'lecturer' || currentUser.role === 'administrator')) { %>
+      <div class="mlspms-nav-heading">Academic Operations</div>
+      <a href="/lecturer/dashboard" class="mlspms-nav-item <%= currentPath === '/lecturer/dashboard' ? 'mlspms-active' : '' %>">
+        <span>Cohort Dashboard</span>
+      </a>
+      <a href="/lecturer/scores/entry" class="mlspms-nav-item <%= currentPath === '/lecturer/scores/entry' ? 'mlspms-active' : '' %>">
+        <span>Continuous Assessment</span>
+      </a>
+      <a href="/lecturer/attendance/entry" class="mlspms-nav-item <%= currentPath === '/lecturer/attendance/entry' ? 'mlspms-active' : '' %>">
+        <span>Attendance Registry</span>
+      </a>
+
+      <div class="mlspms-nav-heading" style="margin-top: 14px;">Reports & Export</div>
+      <a href="/export/cohort/csv" class="mlspms-nav-item">
+        <span>Export Cohort CSV</span>
+      </a>
+      <a href="/export/cohort/print" target="_blank" class="mlspms-nav-item">
+        <span>Print Cohort Summary</span>
+      </a>
+
+      <% if (currentUser.role === 'administrator') { %>
+        <div class="mlspms-nav-heading" style="margin-top: 14px;">Administration</div>
+        <a href="/admin/dashboard" class="mlspms-nav-item <%= currentPath === '/admin/dashboard' ? 'mlspms-active' : '' %>">
+          <span>Admin Center</span>
+        </a>
+        <a href="/admin/models" class="mlspms-nav-item <%= currentPath === '/admin/models' ? 'mlspms-active' : '' %>">
+          <span>ML Model Portal</span>
+        </a>
+        <a href="/admin/users" class="mlspms-nav-item <%= currentPath === '/admin/users' ? 'mlspms-active' : '' %>">
+          <span>User Accounts</span>
+        </a>
+      <% } %>
+    <% } else if (currentUser && currentUser.role === 'student') { %>
+      <div class="mlspms-nav-heading">Student Portal</div>
+      <a href="/student/dashboard" class="mlspms-nav-item <%= currentPath === '/student/dashboard' ? 'mlspms-active' : '' %>">
+        <span>My Performance</span>
+      </a>
+      <a href="/student/notifications" class="mlspms-nav-item <%= currentPath === '/student/notifications' ? 'mlspms-active' : '' %>">
+        <span>Alerts & Notifications</span>
+      </a>
+      <a href="/export/student/<%= currentUser.student_id %>/print" target="_blank" class="mlspms-nav-item">
+        <span>Print Academic Profile</span>
+      </a>
+    <% } %>
+  </div>
+
+  <div class="mlspms-sidebar-footer">
+    <% if (currentUser) { %>
+      <div class="mlspms-user-badge">
+        <div class="mlspms-avatar-circle">
+          <%= currentUser.full_name.charAt(0) %>
+        </div>
+        <div class="mlspms-user-info">
+          <div class="mlspms-user-name"><%= currentUser.full_name %></div>
+          <div class="mlspms-user-role"><%= currentUser.role %></div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</aside>

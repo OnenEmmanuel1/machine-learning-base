@@ -1,0 +1,20 @@
+<header class="mlspms-topbar">
+  <div class="mlspms-topbar-title">
+    <%= typeof title !== 'undefined' ? title.split('|')[0].trim() : 'Dashboard' %>
+  </div>
+
+  <div class="mlspms-topbar-actions">
+    <% if (typeof activeModel !== 'undefined' && activeModel) { %>
+      <div class="mlspms-badge mlspms-badge-neutral" title="Real-time ML Engine Active Classifier">
+        <span class="mlspms-dot mlspms-dot-low"></span>
+        <span>ML Engine: <%= activeModel.model_type.replace('_', ' ').toUpperCase() %> (<%= activeModel.version %>)</span>
+      </div>
+    <% } %>
+
+    <% if (currentUser) { %>
+      <a href="/auth/logout" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+        <span>Sign Out</span>
+      </a>
+    <% } %>
+  </div>
+</header>

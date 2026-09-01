@@ -1,0 +1,288 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <!-- Top Student Profile Banner -->
+      <div class="mlspms-card" style="margin-bottom: 24px; border-left: 6px solid <%= latestPrediction && latestPrediction.risk_level === 'high' ? 'var(--mlspms-risk-high-solid)' : (latestPrediction && latestPrediction.risk_level === 'moderate' ? 'var(--mlspms-risk-mod-solid)' : 'var(--mlspms-risk-low-solid)') %>;">
+        <div class="mlspms-card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
+              Student Performance Profile &bull; <%= student.department %>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 800; color: var(--mlspms-text-main); margin-top: 4px;">
+              <%= student.full_name %> <span style="font-size: 16px; font-weight: 600; color: #64748b;">(<%= student.matric_no %>)</span>
+            </h2>
+            <div style="font-size: 13px; color: #475569; margin-top: 4px;">
+              <strong>Academic Level:</strong> <%= student.level %> Level &bull; 
+              <strong>Supervisor:</strong> <%= student.supervisor_name %> (<%= student.supervisor_email %>)
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; margin-bottom: 4px;">
+              Current Risk Standing
+            </div>
+            <% if (latestPrediction) { %>
+              <% if (latestPrediction.risk_level === 'high') { %>
+                <span class="mlspms-badge mlspms-badge-high" style="font-size: 14px; padding: 6px 14px;">
+                  <span class="mlspms-dot mlspms-dot-high"></span> HIGH RISK (<%= latestPrediction.confidence %>%)
+                </span>
+              <% } else if (latestPrediction.risk_level === 'moderate') { %>
+                <span class="mlspms-badge mlspms-badge-moderate" style="font-size: 14px; padding: 6px 14px;">
+                  <span class="mlspms-dot mlspms-dot-moderate"></span> MODERATE RISK (<%= latestPrediction.confidence %>%)
+                </span>
+              <% } else { %>
+                <span class="mlspms-badge mlspms-badge-low" style="font-size: 14px; padding: 6px 14px;">
+                  <span class="mlspms-dot mlspms-dot-low"></span> LOW RISK (SAFE &bull; <%= latestPrediction.confidence %>%)
+                </span>
+              <% } %>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                Model: <%= latestPrediction.model_type %> (<%= latestPrediction.model_version %>)
+              </div>
+            <% } else { %>
+              <span class="mlspms-badge mlspms-badge-neutral">UNCLASSIFIED</span>
+            <% } %>
+
+            <div style="margin-top: 8px;">
+              <a href="/export/student/<%= student.student_id %>/csv" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+                Export CSV
+              </a>
+              <a href="/export/student/<%= student.student_id %>/print" target="_blank" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+                Print Profile
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Vector & Explainability Section -->
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Feature Vector Breakdown -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Computed Feature Vector Indicators</span>
+            <span class="mlspms-badge mlspms-badge-neutral">FR3 & FR5</span>
+          </div>
+          <div class="mlspms-card-body">
+            <!-- CA Score -->
+            <div class="mlspms-progress-wrapper">
+              <div class="mlspms-progress-info">
+                <span>Continuous Assessment Average (CA)</span>
+                <span><%= featureVector ? featureVector.avg_ca_score : 0 %>% (Benchmark: 50%)</span>
+              </div>
+              <div class="mlspms-progress-bar-bg">
+                <div class="mlspms-progress-bar-fill" style="width: <%= featureVector ? featureVector.avg_ca_score : 0 %>%; background-color: <%= featureVector && featureVector.avg_ca_score < 50 ? 'var(--mlspms-risk-high-solid)' : 'var(--mlspms-primary)' %>;"></div>
+              </div>
+            </div>
+
+            <!-- Attendance Rate -->
+            <div class="mlspms-progress-wrapper">
+              <div class="mlspms-progress-info">
+                <span>Class & Lab Attendance Rate</span>
+                <span><%= featureVector ? featureVector.attendance_rate : 0 %>% (UNICAL Min: 75%)</span>
+              </div>
+              <div class="mlspms-progress-bar-bg">
+                <div class="mlspms-progress-bar-fill" style="width: <%= featureVector ? featureVector.attendance_rate : 0 %>%; background-color: <%= featureVector && featureVector.attendance_rate < 75 ? 'var(--mlspms-risk-high-solid)' : 'var(--mlspms-primary)' %>;"></div>
+              </div>
+            </div>
+
+            <!-- Assignment Submissions -->
+            <div class="mlspms-progress-wrapper">
+              <div class="mlspms-progress-info">
+                <span>Assignment & Practical Submissions</span>
+                <span><%= featureVector ? featureVector.submission_rate : 0 %>% (Benchmark: 70%)</span>
+              </div>
+              <div class="mlspms-progress-bar-bg">
+                <div class="mlspms-progress-bar-fill" style="width: <%= featureVector ? featureVector.submission_rate : 0 %>%; background-color: <%= featureVector && featureVector.submission_rate < 70 ? 'var(--mlspms-risk-mod-solid)' : 'var(--mlspms-primary)' %>;"></div>
+              </div>
+            </div>
+
+            <!-- Explainability Box (NFR5) -->
+            <% if (explanation) { %>
+              <div class="mlspms-explain-box">
+                <div class="mlspms-explain-title">
+                  Machine Learning Rationale & Feature Attribution (NFR5 Explainability)
+                </div>
+                <div class="mlspms-explain-narrative">
+                  <%= explanation.narrative %>
+                </div>
+                <% if (explanation.contributions) { %>
+                  <div style="margin-top: 10px; font-size: 11px; color: #475569; display: flex; gap: 16px;">
+                    <span><strong>CA Weight:</strong> <%= explanation.contributions.avg_ca_score %>%</span>
+                    <span><strong>Attendance Weight:</strong> <%= explanation.contributions.attendance_rate %>%</span>
+                    <span><strong>Submissions Weight:</strong> <%= explanation.contributions.submission_rate %>%</span>
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Radar Chart -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Performance Benchmark Radar</span>
+          </div>
+          <div class="mlspms-card-body">
+            <div class="mlspms-chart-box">
+              <canvas id="studentFeatureRadarChart"
+                data-ca="<%= featureVector ? featureVector.avg_ca_score : 0 %>"
+                data-att="<%= featureVector ? featureVector.attendance_rate : 0 %>"
+                data-sub="<%= featureVector ? featureVector.submission_rate : 0 %>"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assessment & Attendance Details Rows -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Assessment History -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Assessment Records Breakdown</span>
+          </div>
+          <div class="mlspms-table-responsive" style="max-height: 320px; overflow-y: auto;">
+            <table class="mlspms-table" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Type</th>
+                  <th>Score</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (assessments && assessments.length > 0) { %>
+                  <% assessments.forEach(function(a) { %>
+                    <tr>
+                      <td><strong><%= a.course_code %></strong></td>
+                      <td><span class="mlspms-badge mlspms-badge-neutral" style="font-size: 10px;"><%= a.assessment_type %></span></td>
+                      <td><strong><%= a.score %></strong></td>
+                      <td><%= new Date(a.date_recorded).toISOString().split('T')[0] %></td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr><td colspan="4" style="text-align: center; color: #64748b;">No assessment entries found.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Attendance History -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Session Attendance Log</span>
+          </div>
+          <div class="mlspms-table-responsive" style="max-height: 320px; overflow-y: auto;">
+            <table class="mlspms-table" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Session Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (attendance && attendance.length > 0) { %>
+                  <% attendance.forEach(function(att) { %>
+                    <tr>
+                      <td><strong><%= att.course_code %></strong></td>
+                      <td><%= new Date(att.session_date).toISOString().split('T')[0] %></td>
+                      <td>
+                        <% if (att.status === 'present') { %>
+                          <span class="mlspms-badge mlspms-badge-low" style="font-size: 10px;">PRESENT</span>
+                        <% } else { %>
+                          <span class="mlspms-badge mlspms-badge-high" style="font-size: 10px;">ABSENT</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr><td colspan="3" style="text-align: center; color: #64748b;">No attendance records found.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prediction & Alert History Row -->
+      <div class="mlspms-card">
+        <div class="mlspms-card-header">
+          <span class="mlspms-card-title">Machine Learning Prediction & Alert Audit Trail</span>
+        </div>
+        <div class="mlspms-table-responsive">
+          <table class="mlspms-table">
+            <thead>
+              <tr>
+                <th>Evaluation Timestamp</th>
+                <th>Model Used</th>
+                <th>Classification</th>
+                <th>Confidence</th>
+                <th>Alert Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (predictionHistory && predictionHistory.length > 0) { %>
+                <% predictionHistory.forEach(function(p) { %>
+                  <tr>
+                    <td><%= new Date(p.generated_at).toLocaleString('en-GB') %></td>
+                    <td><%= p.model_type.replace('_', ' ').toUpperCase() %> (<%= p.version %>)</td>
+                    <td>
+                      <% if (p.risk_level === 'high') { %>
+                        <span class="mlspms-badge mlspms-badge-high">HIGH RISK</span>
+                      <% } else if (p.risk_level === 'moderate') { %>
+                        <span class="mlspms-badge mlspms-badge-moderate">MODERATE</span>
+                      <% } else { %>
+                        <span class="mlspms-badge mlspms-badge-low">LOW (SAFE)</span>
+                      <% } %>
+                    </td>
+                    <td><%= p.confidence %>%</td>
+                    <td>
+                      <% const matchedAlert = alerts.find(a => a.result_id === p.result_id); %>
+                      <% if (matchedAlert) { %>
+                        <span class="mlspms-badge <%= matchedAlert.status === 'acknowledged' ? 'mlspms-badge-neutral' : 'mlspms-badge-high' %>">
+                          <%= matchedAlert.status.toUpperCase() %>
+                        </span>
+                      <% } else { %>
+                        <span style="color: #94a3b8; font-size: 12px;">None (Low Risk)</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (matchedAlert && matchedAlert.status === 'sent') { %>
+                        <form action="/lecturer/notifications/<%= matchedAlert.alert_id %>/acknowledge" method="POST" style="display: inline;">
+                          <button type="submit" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+                            Acknowledge
+                          </button>
+                        </form>
+                      <% } else if (matchedAlert) { %>
+                        <span style="font-size: 12px; color: #64748b;">Acknowledged</span>
+                      <% } else { %>
+                        -
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="6" style="text-align: center; color: #64748b;">No prediction history yet.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

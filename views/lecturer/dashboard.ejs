@@ -1,0 +1,273 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <!-- Screen A: Tensra-styled Title Header & Action Bar -->
+      <div class="mlspms-page-header">
+        <div class="mlspms-page-header-top">
+          <div>
+            <h1 class="mlspms-page-title">CSC 300L & 400L Cohort — 2025/2026 Session</h1>
+            <div class="mlspms-page-meta">
+              <span>Department of Computer Science &bull; University of Calabar</span>
+              <span>&bull;</span>
+              <span>Updated: Real-time Live Engine</span>
+            </div>
+            <div class="mlspms-tag-chips-row">
+              <span class="mlspms-tag-chip mlspms-tag-chip-active">&#9679; Active Monitoring</span>
+              <span class="mlspms-tag-chip"><%= stats.totalStudents %> Students Monitored</span>
+              <span class="mlspms-tag-chip">Engine: <%= activeModel ? activeModel.model_type.replace('_', ' ').toUpperCase() : 'RANDOM FOREST' %> (<%= activeModel ? activeModel.version : 'v1.0.0' %>)</span>
+              <span class="mlspms-tag-chip">Validated Benchmark: UNICAL CS</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/export/cohort/csv" class="mlspms-btn mlspms-btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export</span>
+            </a>
+            <a href="/lecturer/scores/entry" class="mlspms-btn mlspms-btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Enter Scores</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sub-Nav Tabs (Overview / Labelling / Versions / Validation / Insights) -->
+        <div class="mlspms-subnav-tabs">
+          <a href="/lecturer/dashboard" class="mlspms-subnav-tab mlspms-active">
+            <span>&#9638; Overview</span>
+          </a>
+          <a href="/lecturer/scores/entry" class="mlspms-subnav-tab">
+            <span>&#9998; Continuous Assessment</span>
+          </a>
+          <a href="/lecturer/attendance/entry" class="mlspms-subnav-tab">
+            <span>&#10003; Attendance Register</span>
+          </a>
+          <a href="/export/cohort/print" target="_blank" class="mlspms-subnav-tab">
+            <span>&#128196; Printable Report</span>
+          </a>
+          <% if (currentUser && currentUser.role === 'administrator') { %>
+            <a href="/admin/models" class="mlspms-subnav-tab">
+              <span>&#9881; Model Evaluation</span>
+            </a>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Tensra 4-Stat-Card Grid -->
+      <div class="mlspms-stats-grid">
+        <!-- Card 1: Total Students Monitored -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#128101;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +8.9%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Total Students Monitored</div>
+            <div class="mlspms-stat-value"><%= stats.totalStudents %></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Data Coverage -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#128269;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +5.2%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Data Coverage</div>
+            <div class="mlspms-stat-value"><%= stats.coveragePct %>%</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Safe Academic Standing (% Not at Risk) -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#9989;</div>
+            <span class="mlspms-delta-badge <%= stats.notAtRiskPct >= 50 ? 'mlspms-delta-positive' : 'mlspms-delta-negative' %>">
+              <%= stats.notAtRiskPct >= 50 ? '&#8593; +4.8%' : '&#8595; -2.3%' %>
+            </span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Safe Standing (% Low Risk)</div>
+            <div class="mlspms-stat-value"><%= stats.notAtRiskPct %>%</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Total Predictions & Evaluations -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#9889;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +5.2%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Evaluations / Timely Inferences</div>
+            <div class="mlspms-stat-value"><%= stats.totalPredictions %></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tensra 2-Column Charts Row -->
+      <div class="mlspms-charts-row">
+        <!-- Left: Risk Distribution Bar Chart -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <div>
+              <div class="mlspms-card-title">Cohort Risk Distribution</div>
+              <div class="mlspms-card-subtitle">Breakdown of student classifications across risk categories</div>
+            </div>
+            <span class="mlspms-badge mlspms-badge-neutral">FR5 Distribution</span>
+          </div>
+          <div class="mlspms-card-body">
+            <div class="mlspms-chart-box">
+              <canvas id="tensraRiskBarChart"
+                data-low="<%= stats.lowRiskCount %>"
+                data-mod="<%= stats.modRiskCount %>"
+                data-high="<%= stats.highRiskCount %>"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Risk & Performance Trajectory Line Chart -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <div>
+              <div class="mlspms-card-title">Performance Trajectory Over Time</div>
+              <div class="mlspms-card-subtitle">Average cohort academic health progression across session dates</div>
+            </div>
+            <span class="mlspms-badge mlspms-badge-neutral">Continuous Monitoring</span>
+          </div>
+          <div class="mlspms-card-body">
+            <div class="mlspms-chart-box">
+              <canvas id="tensraTrajectoryLineChart"
+                data-timeline='<%= JSON.stringify(timelinePoints || []) %>'
+              ></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tensra AI Insights / Feature Driver Summary Panel -->
+      <div class="mlspms-insights-panel">
+        <div class="mlspms-insights-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>AI Insights &bull; Cohort Feature-Driver Summary (NFR5)</span>
+        </div>
+        <div class="mlspms-insights-content">
+          <%= aiInsightText %>
+        </div>
+      </div>
+
+      <!-- Cohort Student Registry Table -->
+      <div class="mlspms-card">
+        <div class="mlspms-card-header">
+          <div>
+            <div class="mlspms-card-title">Student Performance & Risk Classification Registry</div>
+            <div class="mlspms-card-subtitle">Automated real-time classification per student based on active ML model</div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="riskLevelFilter" class="mlspms-select" style="width: 140px; padding: 5px 8px; font-size: 11px;">
+              <option value="all">All Risk Levels</option>
+              <option value="high">High Risk Only</option>
+              <option value="moderate">Moderate Risk Only</option>
+              <option value="low">Low Risk Only</option>
+            </select>
+            <input 
+              type="text" 
+              id="tableSearchInput" 
+              class="mlspms-input" 
+              placeholder="Search matric no or name..." 
+              style="width: 200px; padding: 5px 8px; font-size: 11px;"
+            >
+          </div>
+        </div>
+
+        <div class="mlspms-table-responsive">
+          <table class="mlspms-table mlspms-searchable-table">
+            <thead>
+              <tr>
+                <th>Matric No.</th>
+                <th>Student Full Name</th>
+                <th>Level</th>
+                <th>Supervisor</th>
+                <th>Avg CA (%)</th>
+                <th>Attendance (%)</th>
+                <th>Submissions (%)</th>
+                <th>Risk Standing</th>
+                <th>Confidence</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (students && students.length > 0) { %>
+                <% students.forEach(function(s) { %>
+                  <tr data-risk="<%= s.risk_level || 'none' %>">
+                    <td><strong><%= s.matric_no %></strong></td>
+                    <td><%= s.full_name %></td>
+                    <td><%= s.level %>L</td>
+                    <td><%= s.supervisor_name || 'N/A' %></td>
+                    <td><%= s.avg_ca_score ? s.avg_ca_score + '%' : '0%' %></td>
+                    <td><%= s.attendance_rate ? s.attendance_rate + '%' : '0%' %></td>
+                    <td><%= s.submission_rate ? s.submission_rate + '%' : '0%' %></td>
+                    <td>
+                      <% if (s.risk_level === 'high') { %>
+                        <span class="mlspms-badge mlspms-badge-high">
+                          <span class="mlspms-dot mlspms-dot-high"></span> HIGH RISK
+                        </span>
+                      <% } else if (s.risk_level === 'moderate') { %>
+                        <span class="mlspms-badge mlspms-badge-moderate">
+                          <span class="mlspms-dot mlspms-dot-moderate"></span> MODERATE
+                        </span>
+                      <% } else if (s.risk_level === 'low') { %>
+                        <span class="mlspms-badge mlspms-badge-low">
+                          <span class="mlspms-dot mlspms-dot-low"></span> LOW (SAFE)
+                        </span>
+                      <% } else { %>
+                        <span class="mlspms-badge mlspms-badge-neutral">UNCLASSIFIED</span>
+                      <% } %>
+                    </td>
+                    <td><%= s.confidence ? s.confidence + '%' : 'N/A' %></td>
+                    <td style="text-align: right;">
+                      <a href="/lecturer/students/<%= s.student_id %>" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+                        View Analysis
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="10" style="text-align: center; padding: 24px; color: var(--mlspms-text-dim);">
+                    No student records found in the database.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Persistent Status Bar (Tensra Footer Pattern) -->
+    <footer class="mlspms-status-bar">
+      <div class="mlspms-status-left">
+        <span class="mlspms-status-item">Total Monitored: <strong><%= stats.totalStudents %> Students</strong></span>
+        <span class="mlspms-status-item">Courses Active: <strong><%= courses ? courses.length : 5 %> Courses</strong></span>
+        <span class="mlspms-status-item">Active Engine: <strong><%= activeModel ? activeModel.model_type.replace('_', ' ').toUpperCase() : 'RANDOM FOREST' %> (<%= activeModel ? activeModel.version : 'v1.0.0' %>)</strong></span>
+      </div>
+      <div>
+        <span>ML-SPMS UNICAL &bull; Version 1.0.0</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

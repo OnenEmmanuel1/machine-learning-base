@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/mlspms.css">
+  <style>
+    body { background-color: #ffffff; padding: 30px; font-size: 12px; }
+    .print-header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px; }
+    .print-title { font-size: 18px; font-weight: 800; text-transform: uppercase; color: #0f172a; }
+    .print-sub { font-size: 13px; color: #475569; margin-top: 4px; }
+    .print-section { margin-bottom: 20px; }
+    .print-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-bottom: 10px; }
+    .print-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+    .print-table th { background-color: #f1f5f9; font-weight: 700; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="print-header">
+    <div class="print-title">University of Calabar &bull; Department of Computer Science</div>
+    <div class="print-sub">Student Academic Performance & Machine Learning Risk Profile</div>
+    <div style="font-size: 11px; color: #64748b; margin-top: 6px;">Report Date: <%= generatedDate %></div>
+  </div>
+
+  <div class="print-section">
+    <div class="print-section-title">Student Information</div>
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+      <tr>
+        <td style="width: 20%; padding: 4px 0; color: #64748b;">Full Name:</td>
+        <td style="width: 30%; padding: 4px 0; font-weight: 700;"><%= student.full_name %></td>
+        <td style="width: 20%; padding: 4px 0; color: #64748b;">Matriculation No.:</td>
+        <td style="width: 30%; padding: 4px 0; font-weight: 700;"><%= student.matric_no %></td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Academic Level:</td>
+        <td style="padding: 4px 0;"><%= student.level %> Level</td>
+        <td style="padding: 4px 0; color: #64748b;">Academic Supervisor:</td>
+        <td style="padding: 4px 0;"><%= student.supervisor_name %></td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 0; color: #64748b;">Current ML Risk Status:</td>
+        <td style="padding: 4px 0; font-weight: 800; text-transform: uppercase;">
+          <%= latestPrediction ? latestPrediction.risk_level + ' (' + latestPrediction.confidence + '% confidence)' : 'UNCLASSIFIED' %>
+        </td>
+        <td style="padding: 4px 0; color: #64748b;">Evaluated Model:</td>
+        <td style="padding: 4px 0;">
+          <%= latestPrediction ? latestPrediction.model_type + ' (' + latestPrediction.model_version + ')' : 'N/A' %>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="print-section">
+    <div class="print-section-title">Feature Vector Indicators</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+      <div style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">
+        <div style="font-size: 10px; color: #64748b;">Avg CA Score</div>
+        <div style="font-size: 18px; font-weight: 800;"><%= featureVector ? featureVector.avg_ca_score : 0 %>%</div>
+        <div style="font-size: 10px; color: #94a3b8;">Benchmark: 50%</div>
+      </div>
+      <div style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">
+        <div style="font-size: 10px; color: #64748b;">Attendance Rate</div>
+        <div style="font-size: 18px; font-weight: 800;"><%= featureVector ? featureVector.attendance_rate : 0 %>%</div>
+        <div style="font-size: 10px; color: #94a3b8;">UNICAL Min: 75%</div>
+      </div>
+      <div style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">
+        <div style="font-size: 10px; color: #64748b;">Submission Rate</div>
+        <div style="font-size: 18px; font-weight: 800;"><%= featureVector ? featureVector.submission_rate : 0 %>%</div>
+        <div style="font-size: 10px; color: #94a3b8;">Benchmark: 70%</div>
+      </div>
+    </div>
+
+    <% if (explanation) { %>
+      <div style="margin-top: 12px; background-color: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; font-size: 11px;">
+        <strong>Machine Learning Rationale:</strong> <%= explanation.narrative %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="print-section">
+    <div class="print-section-title">Continuous Assessment Breakdown</div>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>Course Code</th>
+          <th>Course Title</th>
+          <th>Assessment Type</th>
+          <th>Score</th>
+          <th>Date Recorded</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (assessments && assessments.length > 0) { %>
+          <% assessments.forEach(function(a) { %>
+            <tr>
+              <td><strong><%= a.course_code %></strong></td>
+              <td><%= a.course_title %></td>
+              <td><%= a.assessment_type.toUpperCase() %></td>
+              <td><strong><%= a.score %></strong></td>
+              <td><%= new Date(a.date_recorded).toISOString().split('T')[0] %></td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr><td colspan="5" style="text-align: center;">No assessment records.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px;">
+    <div>
+      ___________________________________<br>
+      <strong>Academic Supervisor's Signature</strong>
+    </div>
+    <div>
+      ___________________________________<br>
+      <strong>Student's Acknowledgment Signature</strong>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+
+<div class="mlspms-auth-container">
+  <div class="mlspms-auth-card" style="text-align: center;">
+    <div style="font-size: 48px; font-weight: 800; color: var(--mlspms-risk-high-solid); margin-bottom: 8px;">
+      <%= typeof errorCode !== 'undefined' ? errorCode : '500' %>
+    </div>
+    <h3 style="font-size: 18px; font-weight: 700; color: var(--mlspms-text-main); margin-bottom: 12px;">
+      <%= typeof title !== 'undefined' ? title : 'An Error Occurred' %>
+    </h3>
+    <p style="font-size: 13px; color: var(--mlspms-text-muted); margin-bottom: 24px;">
+      <%= typeof errorMessage !== 'undefined' ? errorMessage : 'The requested action could not be completed.' %>
+    </p>
+
+    <a href="/" class="mlspms-btn mlspms-btn-primary">
+      Return to Dashboard
+    </a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

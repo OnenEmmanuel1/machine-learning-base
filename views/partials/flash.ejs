@@ -1,0 +1,23 @@
+<% if (typeof flashSuccess !== 'undefined' && flashSuccess.length > 0) { %>
+  <% flashSuccess.forEach(function(msg) { %>
+    <div class="mlspms-alert mlspms-alert-success">
+      <span><strong>Success:</strong> <%= msg %></span>
+    </div>
+  <% }); %>
+<% } %>
+
+<% if (typeof flashError !== 'undefined' && flashError.length > 0) { %>
+  <% flashError.forEach(function(msg) { %>
+    <div class="mlspms-alert mlspms-alert-error">
+      <span><strong>Notice:</strong> <%= msg %></span>
+    </div>
+  <% }); %>
+<% } %>
+
+<% if (typeof flashInfo !== 'undefined' && flashInfo.length > 0) { %>
+  <% flashInfo.forEach(function(msg) { %>
+    <div class="mlspms-alert mlspms-alert-info">
+      <span><strong>Info:</strong> <%= msg %></span>
+    </div>
+  <% }); %>
+<% } %>

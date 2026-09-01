@@ -1,0 +1,168 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <!-- Top Stats Grid -->
+      <div class="mlspms-stats-grid">
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <span class="mlspms-stat-title">Registered Users</span>
+          </div>
+          <div class="mlspms-stat-value"><%= stats.totalUsers %></div>
+          <div class="mlspms-stat-sub">Lecturers, Admins & Students</div>
+        </div>
+
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <span class="mlspms-stat-title">Tracked Students</span>
+          </div>
+          <div class="mlspms-stat-value"><%= stats.totalStudents %></div>
+          <div class="mlspms-stat-sub">Computer Science Department</div>
+        </div>
+
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <span class="mlspms-stat-title">Active ML Models</span>
+          </div>
+          <div class="mlspms-stat-value"><%= stats.totalModels %></div>
+          <div class="mlspms-stat-sub">DT, RF & Logistic Regression</div>
+        </div>
+
+        <div class="mlspms-stat-card" style="border-left: 4px solid var(--mlspms-risk-high-solid);">
+          <div class="mlspms-stat-header">
+            <span class="mlspms-stat-title">Unacknowledged Alerts</span>
+          </div>
+          <div class="mlspms-stat-value" style="color: var(--mlspms-risk-high-solid);"><%= stats.pendingAlerts %></div>
+          <div class="mlspms-stat-sub">Risk escalation notices</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions and Models Overview -->
+      <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- Models Status -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">Deployed Machine Learning Models (FR7)</span>
+            <a href="/admin/models" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+              Manage & Retrain
+            </a>
+          </div>
+          <div class="mlspms-table-responsive">
+            <table class="mlspms-table">
+              <thead>
+                <tr>
+                  <th>Algorithm</th>
+                  <th>Version</th>
+                  <th>Accuracy</th>
+                  <th>Status</th>
+                  <th>Last Trained</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (models && models.length > 0) { %>
+                  <% models.forEach(function(m) { %>
+                    <tr>
+                      <td><strong><%= m.model_type.replace('_', ' ').toUpperCase() %></strong></td>
+                      <td><%= m.version %></td>
+                      <td><strong><%= m.accuracy %>%</strong></td>
+                      <td>
+                        <% if (m.is_active) { %>
+                          <span class="mlspms-badge mlspms-badge-low">
+                            <span class="mlspms-dot mlspms-dot-low"></span> SERVING LIVE
+                          </span>
+                        <% } else { %>
+                          <span class="mlspms-badge mlspms-badge-neutral">STANDBY</span>
+                        <% } %>
+                      </td>
+                      <td><%= new Date(m.trained_at).toLocaleString('en-GB') %></td>
+                    </tr>
+                  <% }); %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Administration Links -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <span class="mlspms-card-title">System Operations</span>
+          </div>
+          <div class="mlspms-card-body" style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="/admin/models" class="mlspms-btn mlspms-btn-primary" style="justify-content: flex-start; padding: 12px 16px;">
+              <span>Retrain & Compare ML Classifiers</span>
+            </a>
+            <a href="/admin/users" class="mlspms-btn mlspms-btn-secondary" style="justify-content: flex-start; padding: 12px 16px;">
+              <span>Create New User / Student Account</span>
+            </a>
+            <a href="/lecturer/dashboard" class="mlspms-btn mlspms-btn-outline" style="justify-content: flex-start; padding: 12px 16px;">
+              <span>Access Lecturer Cohort Dashboard</span>
+            </a>
+            <a href="/export/cohort/print" target="_blank" class="mlspms-btn mlspms-btn-outline" style="justify-content: flex-start; padding: 12px 16px;">
+              <span>Generate Departmental Summary Report</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Risk Alerts -->
+      <div class="mlspms-card">
+        <div class="mlspms-card-header">
+          <span class="mlspms-card-title">Recent Automated Alerts Dispatched (FR6)</span>
+        </div>
+        <div class="mlspms-table-responsive">
+          <table class="mlspms-table">
+            <thead>
+              <tr>
+                <th>Alert ID</th>
+                <th>Student</th>
+                <th>Risk Level</th>
+                <th>Message Content</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (recentAlerts && recentAlerts.length > 0) { %>
+                <% recentAlerts.forEach(function(a) { %>
+                  <tr>
+                    <td>#<%= a.alert_id %></td>
+                    <td><strong><%= a.matric_no %></strong> (<%= a.student_name %>)</td>
+                    <td>
+                      <% if (a.risk_level === 'high') { %>
+                        <span class="mlspms-badge mlspms-badge-high">HIGH</span>
+                      <% } else { %>
+                        <span class="mlspms-badge mlspms-badge-moderate">MODERATE</span>
+                      <% } %>
+                    </td>
+                    <td style="max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      <%= a.message %>
+                    </td>
+                    <td>
+                      <span class="mlspms-badge <%= a.status === 'sent' ? 'mlspms-badge-high' : 'mlspms-badge-neutral' %>">
+                        <%= a.status.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td><%= new Date(a.timestamp).toLocaleString('en-GB') %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="6" style="text-align: center; color: #64748b;">No recent alerts.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

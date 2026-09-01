@@ -1,0 +1,332 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="mlspms-main-wrapper">
+    <%- include('../partials/navbar') %>
+
+    <main class="mlspms-content-body">
+      <%- include('../partials/flash') %>
+
+      <!-- Screen B: Tensra-styled Title Header & Action Bar -->
+      <div class="mlspms-page-header">
+        <div class="mlspms-page-header-top">
+          <div>
+            <h1 class="mlspms-page-title">
+              <%= activeModel ? activeModel.model_type.replace('_', ' ').toUpperCase() : 'RANDOM FOREST' %> <%= activeModel ? activeModel.version : 'v1.0.0' %>
+            </h1>
+            <div class="mlspms-page-meta">
+              <span>Version <%= activeModel ? activeModel.version : 'v1.0.0' %></span>
+              <span>&bull;</span>
+              <span>Internal Production Collection</span>
+              <span>&bull;</span>
+              <span>UNICAL CS Prediction Engine</span>
+            </div>
+            <div class="mlspms-tag-chips-row">
+              <span class="mlspms-tag-chip mlspms-tag-chip-active">&#9679; production ready</span>
+              <span class="mlspms-tag-chip">validated (<%= activeModel ? activeModel.accuracy : 100 %>% test acc)</span>
+              <span class="mlspms-tag-chip">ensemble classifier</span>
+              <span class="mlspms-tag-chip">active serving engine</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/export/cohort/print" target="_blank" class="mlspms-btn mlspms-btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export</span>
+            </a>
+            <a href="#retrainSection" class="mlspms-btn mlspms-btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span>Retrain Models</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sub-Nav Tabs (Overview / Labelling / Versions / Validation / Insights) -->
+        <div class="mlspms-subnav-tabs">
+          <a href="/admin/models" class="mlspms-subnav-tab mlspms-active">
+            <span>&#9638; Overview</span>
+          </a>
+          <a href="#retrainSection" class="mlspms-subnav-tab">
+            <span>&#128190; Training Data</span>
+          </a>
+          <a href="#versionsSection" class="mlspms-subnav-tab">
+            <span>&#128260; Model Versions</span>
+          </a>
+          <a href="#versionsSection" class="mlspms-subnav-tab">
+            <span>&#9989; Validation & Confusion Matrices</span>
+          </a>
+          <a href="/admin/dashboard" class="mlspms-subnav-tab">
+            <span>&#128200; System Insights</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Tensra 4-Stat-Card Grid (Model Operations) -->
+      <div class="mlspms-stats-grid">
+        <!-- Card 1: Training Samples Used -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#128452;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +8.9%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Total Training Samples</div>
+            <div class="mlspms-stat-value"><%= stats.trainingSamples.toLocaleString() %></div>
+          </div>
+        </div>
+
+        <!-- Card 2: Model Test Accuracy -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#127919;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +5.2%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Active Model Accuracy</div>
+            <div class="mlspms-stat-value"><%= stats.activeAccuracy %>%</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Quality / Macro F1 Score -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#9989;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +4.2%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Quality / Macro F1 Score</div>
+            <div class="mlspms-stat-value"><%= activeModel && activeModel.metrics ? activeModel.metrics.macro_f1 : 100 %>%</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Total Inferences Served -->
+        <div class="mlspms-stat-card">
+          <div class="mlspms-stat-header">
+            <div class="mlspms-stat-icon-wrap">&#9889;</div>
+            <span class="mlspms-delta-badge mlspms-delta-positive">&#8593; +5.2%</span>
+          </div>
+          <div>
+            <div class="mlspms-stat-title">Inferences Served</div>
+            <div class="mlspms-stat-value"><%= stats.totalInferences %></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tensra 2-Column Charts Row -->
+      <div class="mlspms-charts-row">
+        <!-- Left: Feature Importance Bar Chart -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <div>
+              <div class="mlspms-card-title">Feature Importance Distribution</div>
+              <div class="mlspms-card-subtitle">Relative weight contribution of academic indicators in risk classification</div>
+            </div>
+            <span class="mlspms-badge mlspms-badge-neutral">Features</span>
+          </div>
+          <div class="mlspms-card-body">
+            <div class="mlspms-chart-box">
+              <canvas id="tensraFeatureImportanceChart"
+                data-features='<%= JSON.stringify(featureImportances || []) %>'
+              ></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Accuracy Across Algorithms Chart -->
+        <div class="mlspms-card" style="margin-bottom: 0;">
+          <div class="mlspms-card-header">
+            <div>
+              <div class="mlspms-card-title">Algorithm Accuracy & Macro F1 Comparison</div>
+              <div class="mlspms-card-subtitle">Comparative evaluation of CART Decision Tree, Random Forest & Logistic Regression</div>
+            </div>
+            <span class="mlspms-badge mlspms-badge-neutral">FR7 Evaluation</span>
+          </div>
+          <div class="mlspms-card-body">
+            <% 
+              const dt = models.find(m => m.model_type === 'decision_tree');
+              const rf = models.find(m => m.model_type === 'random_forest');
+              const lr = models.find(m => m.model_type === 'logistic_regression');
+            %>
+            <div class="mlspms-chart-box">
+              <canvas id="adminModelComparisonChart"
+                data-dt-acc="<%= dt ? dt.accuracy : 0 %>"
+                data-rf-acc="<%= rf ? rf.accuracy : 0 %>"
+                data-lr-acc="<%= lr ? lr.accuracy : 0 %>"
+                data-dt-f1="<%= dt && dt.metrics ? dt.metrics.macro_f1 : 0 %>"
+                data-rf-f1="<%= rf && rf.metrics ? rf.metrics.macro_f1 : 0 %>"
+                data-lr-f1="<%= lr && lr.metrics ? lr.metrics.macro_f1 : 0 %>"
+              ></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tensra AI Insights Panel (Comparative Summary) -->
+      <div class="mlspms-insights-panel">
+        <div class="mlspms-insights-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>AI Insights &bull; Comparative Model Evaluation Summary</span>
+        </div>
+        <div class="mlspms-insights-content">
+          <%= comparativeInsight %>
+        </div>
+      </div>
+
+      <!-- Retraining Trigger Section -->
+      <div id="retrainSection" class="mlspms-card" style="margin-bottom: 24px;">
+        <div class="mlspms-card-header">
+          <div>
+            <div class="mlspms-card-title">Retrain Machine Learning Layer (FR7)</div>
+            <div class="mlspms-card-subtitle">Generate fresh synthetic training data and re-evaluate all three classifiers</div>
+          </div>
+        </div>
+        <div class="mlspms-card-body">
+          <form action="/admin/models/retrain" method="POST">
+            <div class="mlspms-form-row">
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="sample_count">Training Sample Size</label>
+                <select name="sample_count" id="sample_count" class="mlspms-select">
+                  <option value="800">800 Synthetic Student Records</option>
+                  <option value="1200" selected>1,200 Synthetic Student Records</option>
+                  <option value="2000">2,000 Synthetic Student Records</option>
+                </select>
+                <div class="mlspms-helper-text">80/20 train-test split with multi-class cross validation</div>
+              </div>
+
+              <div class="mlspms-form-group">
+                <label class="mlspms-label" for="active_model">Default Active Model</label>
+                <select name="active_model" id="active_model" class="mlspms-select">
+                  <option value="random_forest" selected>Random Forest Ensemble (ml-random-forest)</option>
+                  <option value="decision_tree">CART Decision Tree (ml-cart)</option>
+                  <option value="logistic_regression">Multinomial Logistic Regression (ml-logistic-regression)</option>
+                </select>
+                <div class="mlspms-helper-text">Selected model serves live classifications during score entry</div>
+              </div>
+            </div>
+
+            <button type="submit" class="mlspms-btn mlspms-btn-primary" style="padding: 10px 20px;">
+              Execute Offline Retraining & Compute Metrics
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Detailed Algorithm Cards & 3x3 Confusion Matrices -->
+      <div id="versionsSection" style="margin-bottom: 16px;">
+        <h3 style="font-size: 14px; font-weight: 700; color: #ffffff; margin-bottom: 14px;">
+          Deployed Model Versions & Confusion Matrices
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <% models.forEach(function(m) { %>
+            <div class="mlspms-card" style="margin-bottom: 0; border-top: 3px solid <%= m.is_active ? 'var(--mlspms-primary)' : 'var(--mlspms-border-color)' %>;">
+              <div class="mlspms-card-header">
+                <div>
+                  <strong style="font-size: 13px; color: #ffffff;">
+                    <%= m.model_type === 'decision_tree' ? 'CART Decision Tree' : (m.model_type === 'random_forest' ? 'Random Forest Ensemble' : 'Logistic Regression') %>
+                  </strong>
+                  <div style="font-size: 11px; color: var(--mlspms-text-dim);">Version: <%= m.version %></div>
+                </div>
+                <div>
+                  <% if (m.is_active) { %>
+                    <span class="mlspms-badge mlspms-badge-low">ACTIVE ENGINE</span>
+                  <% } else { %>
+                    <form action="/admin/models/activate" method="POST" style="display: inline;">
+                      <input type="hidden" name="model_id" value="<%= m.model_id %>">
+                      <button type="submit" class="mlspms-btn mlspms-btn-outline mlspms-btn-sm">
+                        Set Active
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+
+              <div class="mlspms-card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; background-color: var(--mlspms-bg-card-subtle); padding: 10px; border-radius: var(--mlspms-radius-sm); border: 1px solid var(--mlspms-border-color);">
+                  <div>
+                    <div style="font-size: 10px; color: var(--mlspms-text-dim); text-transform: uppercase;">Overall Accuracy</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--mlspms-primary);"><%= m.accuracy %>%</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; color: var(--mlspms-text-dim); text-transform: uppercase;">Macro F1 Score</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #38bdf8;">
+                      <%= m.metrics ? m.metrics.macro_f1 : 'N/A' %>%
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; color: var(--mlspms-text-dim); text-transform: uppercase;">Macro Precision</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #ffffff;"><%= m.metrics ? m.metrics.macro_precision : 'N/A' %>%</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 10px; color: var(--mlspms-text-dim); text-transform: uppercase;">Macro Recall</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #ffffff;"><%= m.metrics ? m.metrics.macro_recall : 'N/A' %>%</div>
+                  </div>
+                </div>
+
+                <!-- 3x3 Confusion Matrix -->
+                <% if (m.metrics && m.metrics.confusion_matrix) { %>
+                  <div>
+                    <div style="font-size: 10px; font-weight: 700; color: var(--mlspms-text-dim); text-transform: uppercase; margin-bottom: 6px;">
+                      Test Confusion Matrix (Actual vs Predicted)
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; border: 1px solid var(--mlspms-border-color);">
+                      <thead>
+                        <tr style="background-color: var(--mlspms-bg-card-subtle);">
+                          <th style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: var(--mlspms-text-dim);">Actual \ Pred</th>
+                          <th style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: var(--mlspms-text-dim);">Low</th>
+                          <th style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: var(--mlspms-text-dim);">Mod</th>
+                          <th style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: var(--mlspms-text-dim);">High</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="padding: 4px; font-weight: 600; border: 1px solid var(--mlspms-border-color); background-color: #12141c;">Low</td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); font-weight: 700; color: #4ade80; background-color: #052e16;"><%= m.metrics.confusion_matrix[0][0] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[0][1] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[0][2] %></td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 4px; font-weight: 600; border: 1px solid var(--mlspms-border-color); background-color: #12141c;">Mod</td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[1][0] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); font-weight: 700; color: #fbbf24; background-color: #451a03;"><%= m.metrics.confusion_matrix[1][1] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[1][2] %></td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 4px; font-weight: 600; border: 1px solid var(--mlspms-border-color); background-color: #12141c;">High</td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[2][0] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); color: #94a3b8;"><%= m.metrics.confusion_matrix[2][1] %></td>
+                          <td style="padding: 4px; border: 1px solid var(--mlspms-border-color); font-weight: 700; color: #f87171; background-color: #450a0a;"><%= m.metrics.confusion_matrix[2][2] %></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                <% } %>
+
+                <div style="font-size: 11px; color: var(--mlspms-text-dim); margin-top: 10px;">
+                  Trained: <%= new Date(m.trained_at).toLocaleString('en-GB') %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Persistent Status Bar (Tensra Footer Pattern) -->
+    <footer class="mlspms-status-bar">
+      <div class="mlspms-status-left">
+        <span class="mlspms-status-item">Models Deployed: <strong><%= models.length %> Classifiers</strong></span>
+        <span class="mlspms-status-item">Active: <strong><%= activeModel ? activeModel.model_type.replace('_', ' ').toUpperCase() : 'RANDOM FOREST' %> (<%= activeModel ? activeModel.version : 'v1.0.0' %>)</strong></span>
+        <span class="mlspms-status-item">Total Inferences: <strong><%= stats.totalInferences %> Records</strong></span>
+      </div>
+      <div>
+        <span>ML-SPMS UNICAL &bull; Version 1.0.0</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

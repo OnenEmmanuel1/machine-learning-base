@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mlspms_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: ml_spms_unical
+    ports:
+      - "3308:3306"
+    volumes:
+      - mlspms_db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", " ", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: mlspms_web_app
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      SESSION_SECRET: unical_cs_ml_spms_prod_secret_2026
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD:
+      DB_NAME: ml_spms_unical
+      ENABLE_EMAIL_DISPATCH: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mlspms_db_data:
+    driver: local

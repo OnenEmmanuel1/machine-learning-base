@@ -1,0 +1,51 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.test
+.env.production
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Debug files
+debug.log
+*.pid
+*.seed
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Typescript build info
+*.tsbuildinfo
+
+# Build output directories
+/dist/
+/build/
+/coverage/
+
+# IDE / editor folders
+.vscode/
+.idea/
+
+# Misc temporary files
+.tmp/
+.cache/
+.sass-cache
+.parcel-cache/
+.next/

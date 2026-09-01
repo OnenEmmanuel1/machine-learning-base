@@ -1,0 +1,76 @@
+<%- include('../partials/header') %>
+
+<div class="mlspms-auth-container">
+  <div class="mlspms-auth-card">
+    <div class="mlspms-auth-header">
+      <div class="mlspms-auth-logo">ML-SPMS UNICAL</div>
+      <div class="mlspms-auth-subtitle">
+        Department of Computer Science &bull; University of Calabar
+      </div>
+      <p style="font-size: 12px; color: #64748b; margin-top: 6px;">
+        Machine Learning-Based Student Performance Monitoring System
+      </p>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <form action="/auth/login" method="POST">
+      <div class="mlspms-form-group">
+        <label class="mlspms-label" for="identifier">Email Address or Matric No.</label>
+        <input 
+          type="text" 
+          id="identifier" 
+          name="identifier" 
+          class="mlspms-input" 
+          placeholder="e.g. lecturer@unical-cs.edu.ng or CSC/2021/041" 
+          required 
+          autofocus
+        >
+      </div>
+
+      <div class="mlspms-form-group">
+        <label class="mlspms-label" for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="mlspms-input" 
+          placeholder="Enter account password" 
+          required
+        >
+      </div>
+
+      <button type="submit" class="mlspms-btn mlspms-btn-primary" style="width: 100%; padding: 10px; margin-top: 8px;">
+        Sign In to Portal
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--mlspms-border-color); font-size: 11px; color: var(--mlspms-text-dim);">
+      <strong style="color: var(--mlspms-text-muted); display: block; margin-bottom: 6px; text-transform: uppercase;">Pre-seeded Demo Credentials:</strong>
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1;">
+        <tr>
+          <td style="padding: 2px 0;"><strong>Administrator:</strong></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">admin@unical-cs.edu.ng</code></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">password123</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 2px 0;"><strong>Lecturer:</strong></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">lecturer@unical-cs.edu.ng</code></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">password123</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 2px 0;"><strong>Student (High Risk):</strong></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">CSC/2021/041</code></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">password123</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 2px 0;"><strong>Student (Safe):</strong></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">CSC/2021/005</code></td>
+          <td><code style="color: var(--mlspms-primary); background: #12151d; padding: 1px 4px; border-radius: 3px;">password123</code></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
